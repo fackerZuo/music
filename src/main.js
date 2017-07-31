@@ -3,10 +3,11 @@ import App from './App'
 import router from './router'
 
 Vue.config.productionTip = false
+import 'common/stylus/index.styl'
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',//这里是实例化
+  el: '#app',
   router,
   render: h => h(App)
 })
