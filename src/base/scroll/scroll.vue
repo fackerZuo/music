@@ -42,6 +42,12 @@
           scrollY: true,
           scrollX: false
         })
+        if (this.listenScroll) {
+          let vue = this
+          this.scroll.on('scroll', (pos) => {
+            vue.$emit('scroll', pos)
+          })
+        }
       },
       enable() {
         this.scroll && this.scroll.enable()
