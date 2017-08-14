@@ -6,14 +6,38 @@
 
 <script type="text/ecmascript-6">
   import {mapGetters} from 'vuex'
+  import {getSingerDetail} from 'api/singer.js'
+  import {ERR_OK} from 'api/config.js'
   export default {
+    data() {
+      return {
+        detail: []
+      }
+    },
     computed: {
       ...mapGetters([
         'singer'
       ])
     },
     created() {
-      console.log(this.singer)
+      this._getSingerDetail(this.singer.id)
+    },
+    components: {
+
+    },
+    methods: {
+
+      _getSingerDetail(singerId) {
+        if (!this.singer.id) {
+          this.$router.push('/singer')
+          return
+        }
+        getSingerDetail(singerId).then((res) => {
+          if (res.code === ERR_OK) {
+            this.detail = res
+          }
+        })
+      }
     }
   }
 </script>
