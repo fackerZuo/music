@@ -8,10 +8,11 @@
   import {mapGetters} from 'vuex'
   import {getSingerDetail} from 'api/singer.js'
   import {ERR_OK} from 'api/config.js'
+  import Song from 'api/song.js'
   export default {
     data() {
       return {
-        detail: []
+        song: []
       }
     },
     computed: {
@@ -26,7 +27,6 @@
 
     },
     methods: {
-
       _getSingerDetail(singerId) {
         if (!this.singer.id) {
           this.$router.push('/singer')
@@ -36,6 +36,12 @@
           if (res.code === ERR_OK) {
             this.detail = res
           }
+        })
+      },
+      _normalLizeSongs(list) {
+        let ret = []
+        list.forEach((item) => {
+          let {musicData} = item
         })
       }
     }
