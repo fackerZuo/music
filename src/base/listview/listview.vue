@@ -4,7 +4,7 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="item in group.items" class="list-group-item">
+          <li v-for="item in group.items" class="list-group-item" @click="selectSinger(item)">
             <img v-lazy="item.avatar" alt="" class="avatar">
             <span class="name">{{item.name}}</span>
           </li>
@@ -21,12 +21,16 @@
     <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <div class="fixed-title">{{fixedTitle}}</div>
     </div>
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script type="text/ecmascript-6">
   import Scroll from 'base/scroll/scroll'
   import {getData} from 'common/js/dom'
+  import Loading from 'base/loading/loading'
   const ANCHOR_HEIGHT = 18
   const FIXED_HEIGHT = 30
   export default {
@@ -63,7 +67,8 @@
       }
     },
     components: {
-      Scroll
+      Scroll,
+      Loading
     },
     watch: {
       data() {
@@ -140,6 +145,9 @@
           height += item.clientHeight
           this.listHeight.push(height)
         }
+      },
+      selectSinger(item) {
+        this.$emit('select', item)
       }
     }
   }
