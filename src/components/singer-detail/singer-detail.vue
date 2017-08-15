@@ -1,14 +1,16 @@
 <template>
   <transition name="slider">
-    <div class="singer-detail"></div>
+    <music-list :bg-image="bgImage" :songs="song" :title="title"></music-list>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
+  import MusicList from 'components/music-list/music-list.vue'
   import {mapGetters} from 'vuex'
   import {getSingerDetail} from 'api/singer.js'
   import {ERR_OK} from 'api/config.js'
   import {createSong} from 'common/js/song.js'
+
   export default {
     data() {
       return {
@@ -16,6 +18,12 @@
       }
     },
     computed: {
+      title() {
+        return this.singer.name
+      },
+      bgImage() {
+        return this.singer.avatar
+      },
       ...mapGetters([
         'singer'
       ])
@@ -24,7 +32,7 @@
       this._getSingerDetail(this.singer.id)
     },
     components: {
-
+      MusicList
     },
     methods: {
       _getSingerDetail(singerId) {
@@ -35,7 +43,6 @@
         getSingerDetail(singerId).then((res) => {
           if (res.code === ERR_OK) {
             this.song = this._normalLizeSongs(res.data.list)
-            console.log(this.song)
           }
         })
       },
@@ -47,6 +54,7 @@
             ret.push(createSong(musicData))
           }
         })
+        console.log(ret)
         return ret
       }
     }
@@ -56,14 +64,6 @@
 <style lang="stylus" rel="stylesheet/stylus">
   @import '~common/stylus/variable'
 
-  .singer-detail
-    position: fixed
-    z-index: 100
-    top: 0
-    left: 0
-    bottom: 0
-    right: 0
-    background: $color-background
   .slider-enter-active,.slider-leave-active
     transition: all 0.3s
   .slider-enter,.slider-leave-to
