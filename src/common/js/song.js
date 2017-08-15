@@ -1,5 +1,5 @@
 export default class Song {
-  constructor({id, mid, singer, name, album, duration, image, url}) {
+  constructor({id, mid, singer, name, album, duration, image, url, albumimage}) {
     this.id = id
     this.mid = mid
     this.singer = singer
@@ -8,26 +8,37 @@ export default class Song {
     this.duration = duration
     this.image = image
     this.url = url
+    this.albumimages = albumimage
   }
 }
-export function createrSong(musicData) {
+export function createSong(musicData) {
   return new Song({
     id: musicData.songid,
-    mid: musicData.albummid,
+    mid: musicData.songmid,
     singer: Songers(musicData.singer),
     name: musicData.songname,
-    ablum: musicData.albumname,
-    image: `http://y.gtimg.cn/music/photo_new/T001R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
+    album: musicData.albumname,
+    duration: musicData.interval,
+    image: `https://y.gtimg.cn/music/photo_new/T001R300x300M000${SongerId(musicData.singer)}.jpg?max_age=2592000`,
+    albumimage: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${musicData.albummid}.jpg?max_age=2592000`,
     url: `http://thirdparty.gtimg.com/${musicData.songid}.m4a?fromtag=38`
   })
 }
-function Songers(songer) {
+function Songers(singer) {
   let ret = []
-  if (!songer.name) {
+  if (!singer) {
     return ''
   }
-  songer.forEach((s) => {
+  singer.forEach((s) => {
     ret.push(s.name)
   })
   return ret.join('/')
+}
+function SongerId(singer) {
+  let ret = ''
+  if (!singer) {
+    return ''
+  }
+  ret = singer[0].mid
+  return ret
 }
