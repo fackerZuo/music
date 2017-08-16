@@ -10,6 +10,7 @@ export function hasClass(el, className) {
   let reg = new RegExp('(^|\\s)' + className + '(\\s|$)')
   return reg.test(el.className)
 }
+
 export function getData(el, name, val) {
   const prefix = 'data-'
   name = prefix + name
@@ -18,4 +19,31 @@ export function getData(el, name, val) {
   } else {
     return el.getAttribute(name)
   }
+}
+
+let elementStyle = document.createElement('div').style
+let vendor = (() => {
+  let transfromName = {
+    webkit: "webkitTransform",
+    o: "oTransform",
+    moz: "mozTransform",
+    ms: "msTransform",
+    standard: "transfrom"
+  }
+  for (let key in transfromName) {
+    if (elementStyle[transfromName[key] !== undefined]) {
+      return key
+    }
+  }
+  return false
+})()
+
+export function prefixStyle(style) {
+  if (vendor === false) {
+    return false
+  }
+  if (vendor === 'standard') {
+    return style
+  }
+  return vendor + style.charAt(0).toUpperCase() + style.substring(1)
 }

@@ -5,9 +5,10 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="setImage" ref="tops">
-      <div class="filter"></div>
+      <div class="filter" ref="filter"></div>
     </div>
-    <scroll :data="songs" class="list" ref="scroll">
+    <div class="bg-layer" ref="bglayer"></div>
+    <scroll :data="songs" class="list" ref="scroll" :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
       </div>
@@ -18,7 +19,15 @@
 <script type="text/ecmascript-6">
   import SongList from 'base/song-list/song-list'
   import Scroll from 'base/scroll/scroll'
+  const NAV_HEIGHT = 40
   export default {
+    data() {
+      return {
+        probeType: 3,
+        listenScroll: true,
+        scrollY: 0
+      }
+    },
     props: {
       title: {
         type: String,
@@ -34,7 +43,44 @@
       }
     },
     mounted() {
+      this.bgImageHeight = this.$refs.tops.clientHeight
+      this.scrollHeight = -this.bgImageHeight + NAV_HEIGHT
       this.$refs.scroll.$el.style.top = `${this.$refs.tops.clientHeight}px`
+    },
+    methods: {
+      scroll(res) {
+        this.scrollY = res.y
+      }
+    },
+    watch: {
+      scrollY(newY) {
+        let height = Math.max(this.scrollHeight, newY)
+        let zIndex = 0
+        let scale = 1
+        let blur = 0
+        this.$refs.bglayer.style['transform'] = `translate3d(0,${height}px,0)`
+        this.$refs.bglayer.style['webkitTransform'] = `translate3d(0,${height}px,0)`
+        const percent = Math.abs(newY / this.bgImageHeight)
+        if (newY > 0) {
+          zIndex = 10
+          scale = scale + percent
+          this.$refs.tops.style['transform'] = `scale(${scale})`
+          this.$refs.tops.style['webkitTransform'] = `scale(${scale})`
+        } else {
+          blur = Math.min(20 * percent, 20)
+        }
+        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`
+        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+        if (newY < this.scrollHeight) {
+          zIndex = 10
+          this.$refs.tops.style.paddingTop = 0
+          this.$refs.tops.style.height = `${NAV_HEIGHT}px`
+        } else {
+          this.$refs.tops.style.paddingTop = '70%'
+          this.$refs.tops.style.height = 0
+        }
+        this.$refs.tops.style.zIndex = zIndex
+      }
     },
     computed: {
       setImage() {
@@ -129,7 +175,6 @@
       bottom: 0
       width: 100%
       background: $color-background
-      overflow: hidden
       .song-list-wrapper
         padding: 20px 30px
       .loading-container
