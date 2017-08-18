@@ -1,16 +1,25 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="setImage" ref="tops">
       <div class="filter" ref="filter"></div>
+      <div class="play-wrapper" v-show="songs.length > 0" ref="play">
+        <div class="play">
+          <i class="icon-play"></i>
+          <h3 class="text">随机播放全部</h3>
+        </div>
+      </div>
     </div>
     <div class="bg-layer" ref="bglayer"></div>
     <scroll :data="songs" class="list" ref="scroll" :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
+      </div>
+      <div class="loading-container" v-show="!songs.length">
+        <loading></loading>
       </div>
     </scroll>
   </div>
@@ -19,7 +28,11 @@
 <script type="text/ecmascript-6">
   import SongList from 'base/song-list/song-list'
   import Scroll from 'base/scroll/scroll'
+  import {prefixStyle} from 'common/js/dom'
+  import Loading from 'base/loading/loading'
   const NAV_HEIGHT = 40
+  const backdrop = prefixStyle('backdrop-filter')
+  const transform = prefixStyle('transform')
   export default {
     data() {
       return {
@@ -50,6 +63,9 @@
     methods: {
       scroll(res) {
         this.scrollY = res.y
+      },
+      back() {
+        this.$router.back()
       }
     },
     watch: {
@@ -58,26 +74,25 @@
         let zIndex = 0
         let scale = 1
         let blur = 0
-        this.$refs.bglayer.style['transform'] = `translate3d(0,${height}px,0)`
-        this.$refs.bglayer.style['webkitTransform'] = `translate3d(0,${height}px,0)`
+        this.$refs.bglayer.style[transform] = `translate3d(0,${height}px,0)`
         const percent = Math.abs(newY / this.bgImageHeight)
         if (newY > 0) {
           zIndex = 10
           scale = scale + percent
-          this.$refs.tops.style['transform'] = `scale(${scale})`
-          this.$refs.tops.style['webkitTransform'] = `scale(${scale})`
+          this.$refs.tops.style[transform] = `scale(${scale})`
         } else {
           blur = Math.min(20 * percent, 20)
         }
-        this.$refs.filter.style['backdrop-filter'] = `blur(${blur}px)`
-        this.$refs.filter.style['webkitBackdrop-filter'] = `blur(${blur}px)`
+        this.$refs.filter.style[backdrop] = `blur(${blur}px)`
         if (newY < this.scrollHeight) {
           zIndex = 10
           this.$refs.tops.style.paddingTop = 0
           this.$refs.tops.style.height = `${NAV_HEIGHT}px`
+          this.$refs.play.style['display'] = 'none'
         } else {
           this.$refs.tops.style.paddingTop = '70%'
           this.$refs.tops.style.height = 0
+          this.$refs.play.style['display'] = 'block'
         }
         this.$refs.tops.style.zIndex = zIndex
       }
@@ -89,7 +104,8 @@
     },
     components: {
       SongList,
-      Scroll
+      Scroll,
+      Loading
     }
   }
 </script>

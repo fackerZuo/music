@@ -24,14 +24,14 @@ export function getData(el, name, val) {
 let elementStyle = document.createElement('div').style
 let vendor = (() => {
   let transfromName = {
-    webkit: "webkitTransform",
-    o: "oTransform",
-    moz: "mozTransform",
-    ms: "msTransform",
-    standard: "transfrom"
+    webkit: 'WebkitTransform',
+    O: 'oTransform',
+    Moz: 'MozTransform',
+    ms: 'msTransform',
+    standard: 'transfrom'
   }
   for (let key in transfromName) {
-    if (elementStyle[transfromName[key] !== undefined]) {
+    if (elementStyle[transfromName[key]] !== undefined) {
       return key
     }
   }
@@ -45,5 +45,5 @@ export function prefixStyle(style) {
   if (vendor === 'standard') {
     return style
   }
-  return vendor + style.charAt(0).toUpperCase() + style.substring(1)
+  return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }
