@@ -1,11 +1,11 @@
 <template>
-  <div class="player" v-show="playList.length > 0" >
+  <div class="player" v-if="currentSong" v-show="playList.length > 0" >
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img width="100%" height="100%" :src="currentSong.image">
         </div>
-        <div class="top" :click="back">
-          <div class="back" >
+        <div class="top">
+          <div class="back" @click="back" >
             <i class="icon-back"></i>
           </div>
           <h1 class="title" v-html="currentSong.name"></h1>
@@ -40,7 +40,7 @@
           </div>
         </div>
       </div>
-      <div class="mini-player" v-show="!fullScreen" >
+      <div class="mini-player" v-show="!fullScreen" @click="full">
         <div class="icon">
           <img width="40" height="40" :src="currentSong.albumimages">
         </div>
@@ -58,7 +58,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {mapGetters} from 'vuex'
+  import {mapGetters, mapMutations} from 'vuex'
   export default {
     computed: {
       ...mapGetters([
@@ -69,8 +69,14 @@
     },
     methods: {
       back() {
-        alert(1)
-      }
+        this.setFullScreen(false)
+      },
+      full() {
+        this.setFullScreen(true)
+      },
+      ...mapMutations({
+        setFullScreen: 'SET_FULL_SCREEN'
+      })
     }
   }
 </script>
