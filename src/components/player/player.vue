@@ -1,5 +1,6 @@
 <template>
   <div class="player" v-if="currentSong" v-show="playList.length > 0" >
+    <transition name="normal">
       <div class="normal-player" v-show="fullScreen">
         <div class="background">
           <img width="100%" height="100%" :src="currentSong.image">
@@ -40,6 +41,8 @@
           </div>
         </div>
       </div>
+    </transition>
+    <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="full">
         <div class="icon">
           <img width="40" height="40" :src="currentSong.albumimages">
@@ -54,6 +57,8 @@
           <i class="icon-playlist"></i>
         </div>
       </div>
+    </transition>
+
   </div>
 </template>
 
