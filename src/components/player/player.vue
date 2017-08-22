@@ -20,8 +20,8 @@
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
-                <img class="image" :src="currentSong.albumimages">
+              <div class="cd" :class="rotateClass">
+                <img class="image" :src="currentSong.albumimages" >
               </div>
             </div>
           </div>
@@ -31,14 +31,14 @@
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-prev"></i>
+            <div class="icon i-left" :class="disable">
+              <i class="icon-prev"  @click="prevSong"></i>
             </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disable">
               <i :class="PlayingClass" @click="togglePlaying"></i>
             </div>
-            <div class="icon i-right">
-              <i class="icon-next"></i>
+            <div class="icon i-right" :class="disable">
+              <i class="icon-next" @click="nextSong"></i>
             </div>
             <div class="icon i-right">
               <i class="icon icon-not-favorite"></i>
@@ -49,8 +49,8 @@
     </transition>
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="full">
-        <div class="icon">
-          <img width="40" height="40" :src="currentSong.albumimages">
+        <div class="icon" >
+          <img width="40" height="40" :src="currentSong.albumimages" :class="rotateClass">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
@@ -63,7 +63,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio"></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="canplay" @error="error"></audio>
   </div>
 </template>
 
@@ -73,18 +73,30 @@
   import {prefixStyle} from 'common/js/dom'
   const transform = prefixStyle('transform')
   export default {
+    data() {
+      return {
+        readyplay: false
+      }
+    },
     computed: {
       ...mapGetters([
         'fullScreen',
         'playList',
         'currentSong',
-        'playing'
+        'playing',
+        'currentIndex'
       ]),
       PlayingClass() {
         return this.playing ? 'icon-pause' : 'icon-play'
       },
       miniPlay() {
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      },
+      rotateClass() {
+        return this.playing ? 'play' : 'pause'
+      },
+      disable() {
+        return this.readyplay ? '' : 'disable'
       }
     },
     methods: {
@@ -95,11 +107,49 @@
         this.setFullScreen(true)
       },
       togglePlaying() {
+        if (!this.readyplay) {
+          return
+        }
         this.setPlaying(!this.playing)
+      },
+      nextSong() {
+        if (!this.readyplay) {
+          return
+        }
+        let index = this.currentIndex + 1
+        if (index === this.playList.length) {
+          index = 0
+        }
+        this.setSongIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+        this.readyplay = false
+      },
+      prevSong() {
+        if (!this.readyplay) {
+          return
+        }
+        let index = this.currentIndex - 1
+        if (index === -1) {
+          index = this.playList.length - 1
+        }
+        this.setSongIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+        this.readyplay = false
+      },
+      canplay() {
+        this.readyplay = true
+      },
+      error() { // 如果发生错误，也得让功能可用
+        this.readyplay = true
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlaying: 'SET_PLAY_STATE'
+        setPlaying: 'SET_PLAY_STATE',
+        setSongIndex: 'SET_CURRENTINDEX'
       }),
       enter(el, done) {
         const {x, y, scale} = this._getPostAndScale()
