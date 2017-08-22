@@ -1,7 +1,12 @@
 <template>
   <div class="player" v-if="currentSong" v-show="playList.length > 0" >
-    <transition name="normal">
-      <div class="normal-player" v-show="fullScreen">
+    <transition appear name="normal"
+                @enter="enter"
+                @after-enter="afterEnter"
+                @leave="leave"
+                @after-leave="afterLeave"
+    >
+      <div class="normal-player"v-show="fullScreen">
         <div class="background">
           <img width="100%" height="100%" :src="currentSong.image">
         </div>
@@ -14,7 +19,7 @@
         </div>
         <div class="middle">
           <div class="middle-l">
-            <div class="cd-wrapper">
+            <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd">
                 <img class="image" :src="currentSong.albumimages">
               </div>
@@ -30,7 +35,7 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i :class="PlayingClass" @click="togglePlaying"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-next"></i>
@@ -54,23 +59,33 @@
         <div class="control">
         </div>
         <div class="control">
-          <i class="icon-playlist"></i>
+          <i :class="miniPlay" @click.stop="togglePlaying"></i>
         </div>
       </div>
     </transition>
-
+    <audio :src="currentSong.url" ref="audio"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex'
+  import animations from 'create-keyframe-animation'
+  import {prefixStyle} from 'common/js/dom'
+  const transform = prefixStyle('transform')
   export default {
     computed: {
       ...mapGetters([
         'fullScreen',
         'playList',
-        'currentSong'
-      ])
+        'currentSong',
+        'playing'
+      ]),
+      PlayingClass() {
+        return this.playing ? 'icon-pause' : 'icon-play'
+      },
+      miniPlay() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+      }
     },
     methods: {
       back() {
@@ -79,9 +94,77 @@
       full() {
         this.setFullScreen(true)
       },
+      togglePlaying() {
+        this.setPlaying(!this.playing)
+      },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN'
-      })
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlaying: 'SET_PLAY_STATE'
+      }),
+      enter(el, done) {
+        const {x, y, scale} = this._getPostAndScale()
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+          },
+          60: {
+            transform: `translate3d(0, 0, 0) scale(1.1)`
+          },
+          100: {
+            transform: `translate3d(0, 0, 0) scale(1)`
+          }
+        }
+        animations.registerAnimation({
+          name: 'move',
+          animation,
+          persets: {
+            duration: 400,
+            easing: 'linear'
+          }
+        })
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done)
+      },
+      afterEnter() {
+        animations.unregisterAnimation('move')
+        this.$refs.cdWrapper.style[transform] = ''
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.transition = 'all 0.4s'
+        const {x, y, scale} = this._getPostAndScale()
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+        this.$refs.cdWrapper.addEventListener('transitionend', done)
+      },
+      afterLeave() {
+        this.$refs.cdWrapper.style.transition = ''
+        this.$refs.cdWrapper.style[transform] = ''
+      },
+      _getPostAndScale() {
+        const paddingLeft = 40
+        const paddingBottom = 30
+        const targetWidth = 40
+        const marginTop = 80
+        const cdWidth = window.innerWidth * 0.8
+        const x = -(window.innerWidth / 2 - paddingLeft)
+        const y = window.innerHeight - marginTop - cdWidth / 2 - paddingBottom
+        const scale = targetWidth / cdWidth
+        return {
+          x,
+          y,
+          scale
+        }
+      }
+    },
+    watch: {
+      currentSong() {
+        this.$nextTick(() => {
+          this.$refs.audio.play()
+        })
+      },
+      playing(newPlaying) {
+        this.$nextTick(() => {
+          return newPlaying ? this.$refs.audio.play() : this.$refs.audio.pause()
+        })
+      }
     }
   }
 </script>
