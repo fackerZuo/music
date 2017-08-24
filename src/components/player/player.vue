@@ -27,6 +27,11 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{format(currentTime)}}</span>
+            <div class="progress-bar-wrapper"></div>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -63,7 +68,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @canplay="canplay" @error="error"></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="canplay" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -75,7 +80,8 @@
   export default {
     data() {
       return {
-        readyplay: false
+        readyplay: false,
+        currentTime: 0
       }
     },
     computed: {
@@ -93,7 +99,7 @@
         return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
       },
       rotateClass() {
-        return this.playing ? 'play' : 'pause'
+        return this.playing ? 'play' : 'play pause'
       },
       disable() {
         return this.readyplay ? '' : 'disable'
@@ -111,6 +117,23 @@
           return
         }
         this.setPlaying(!this.playing)
+      },
+      updateTime(e) {
+        this.currentTime = e.target.currentTime
+      },
+      format(interval) {
+        interval = interval | 0
+        let second = interval / 60 | 0
+        let minites = this._pod(interval % 60)
+        return `${second}:${minites}`
+      },
+      _pod(num, n = 2) {
+        let length = num.toString().length
+        while (length < n) {
+          num = '0' + num
+          length++
+        }
+        return num
       },
       nextSong() {
         if (!this.readyplay) {
