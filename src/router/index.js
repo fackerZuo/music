@@ -9,6 +9,7 @@ import SingerDetail from 'components/singer-detail/singer-detail.vue'
 Vue.use(Router)
 
 export default new Router({
+
   routes: [
     {
       path: '/',

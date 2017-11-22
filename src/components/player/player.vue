@@ -29,7 +29,9 @@
         <div class="bottom">
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
-            <div class="progress-bar-wrapper"></div>
+            <div class="progress-bar-wrapper">
+              <progressBar :percent = "percent"></progressBar>
+            </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
@@ -76,6 +78,7 @@
   import {mapGetters, mapMutations} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
+  import progressBar from 'base/progress-bar/progress-bar.vue'
   const transform = prefixStyle('transform')
   export default {
     data() {
@@ -103,6 +106,9 @@
       },
       disable() {
         return this.readyplay ? '' : 'disable'
+      },
+      percent() {
+        return this.currentTime / this.currentSong.duration
       }
     },
     methods: {
@@ -238,6 +244,9 @@
           return newPlaying ? this.$refs.audio.play() : this.$refs.audio.pause()
         })
       }
+    },
+    components: {
+      progressBar
     }
   }
 </script>
