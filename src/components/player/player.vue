@@ -30,7 +30,7 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progressBar :percent = "percent"></progressBar>
+              <progressBar :percent = "percent" @changePercent = "changePercent"></progressBar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
@@ -112,6 +112,7 @@
       }
     },
     methods: {
+
       back() {
         this.setFullScreen(false)
       },
@@ -231,6 +232,9 @@
           y,
           scale
         }
+      },
+      changePercent(newPercent) {
+        this.$refs.audio.currentTime = newPercent * this.currentSong.duration
       }
     },
     watch: {

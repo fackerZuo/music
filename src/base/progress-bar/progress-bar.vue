@@ -1,8 +1,12 @@
 <template>
   <div class="progress-bar" ref="progressBar">
     <div class="bar-inner">
-      <div class="progress" ref="progress"></div>
-      <div class="progress-btn-wrapper" ref="progressBtn">
+      <div class="progress" ref="progress" @click = "btnMove"></div>
+      <div class="progress-btn-wrapper" ref="progressBtn"
+           @touchstart.prevent="touchStart"
+           @touchmove.prevent="touchMove"
+           @touchend="touchEnd"
+       >
         <div class="progress-btn"></div>
       </div>
     </div>
@@ -22,8 +26,44 @@
     },
     watch: {
       percent(newPercent) {
+        if (newPercent >= 0 && !this.touch.initiated) {
+          let progressWidth = this.$refs.progressBar.clientWidth - btnWidth
+          let removeWidth = newPercent * progressWidth
+          this.btnRemove(removeWidth)
+        }
+      }
+    },
+    created() {
+      this.touch = {}
+    },
+    methods: {
+      touchStart(e) {
+        this.touch.initiated = true
+        this.touch.startX = e.touches[0].pageX
+        console.log(e.touches[0])
+        this.touch.left = this.$refs.progress.clientWidth
+      },
+      touchMove(e) {
+        if (!this.touch.initiated) {
+          return
+        }
+        let move = e.touches[0].pageX - this.touch.startX
+        let moveWidth = Math.min(this.$refs.progressBar.clientWidth - btnWidth, Math.max(0, move + this.touch.left))
+        this.btnRemove(moveWidth)
+      },
+      touchEnd() {
+        this._triggerPercent()
+        this.touch.initiated = false
+      },
+      btnMove(e) {
+        let clickWidth = e.touches[0].pageX - this.$refs.progress.clientWidth
+      },
+      _triggerPercent() {
         let progressWidth = this.$refs.progressBar.clientWidth - btnWidth
-        let removeWidth = newPercent * progressWidth
+        let newPercent = this.$refs.progress.clientWidth / progressWidth
+        this.$emit('changePercent', newPercent)
+      },
+      btnRemove(removeWidth) {
         this.$refs.progress.style.width = `${removeWidth}px`
         this.$refs.progressBtn.style[transform] = `translate3d(${removeWidth}px,0,0)`
       }
